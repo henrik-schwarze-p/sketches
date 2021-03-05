@@ -6,6 +6,10 @@
 #include "BoardLib.h"
 
 void fatalError(int code, int extraInfo) {
+    int port = admin::alarmPort();
+    if (port)
+        pm::_digitalWrite(port, 1);
+
     setColor(colorBlack);
     fillRect(0, 0, horizontalResolution, verticalResolution);
     setPrintX(margin);

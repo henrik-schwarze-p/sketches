@@ -1,3 +1,4 @@
+#include "Instance.h"
 #include "Target.h"
 #include "Namespaces.h"
 #include "MainLoop.h"

@@ -1,13 +1,25 @@
 
 #ifndef Target_h
 #define Target_h
-unsigned int millis();
 
 #define MAX_NUMBER_OF_BUTTONS 2
-#define MAX_NUMBER_OF_DEBUG_BUTTONS 10
+#define MAX_NUMBER_OF_DEBUG_BUTTONS 0
 
-#define HR (320 * 3)
-#define VR (240 * 3)
+#define TFT Elegoo_TFTLCD
+#include <Elegoo_GFX.h>
+#include <Elegoo_TFTLCD.h>
+#include <TouchScreen.h>
+#define YP A3  // must be an analog pin, use "An" notation!
+#define XM A2  // must be an analog pin, use "An" notation!
+#define YM 9   // can be a digital pin
+#define XP 8   // can be a digital pin
+#define TS_MINX 120
+#define TS_MAXX 900
+#define TS_MAXY 920
+#define TS_MINY 70
+
+#define HR 320
+#define VR 240
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,13 +43,10 @@ void* intToPointer(int i);
 
 // TOUCH SCREEN
 
-int  listenToTouchesOnScreen();
-int  getTouchX();
-int  getTouchY();
-int  touched();
-void setTouchX(int x);
-void setTouchY(int x);
-void setMouseUp(int up);
+int listenToTouchesOnScreen();
+int getTouchX();
+int getTouchY();
+int touched();
 
 // CONSOLE
 
@@ -49,15 +58,6 @@ void consoleln();
 void console(const char* c);
 void console(float f);
 void console(int i);
-
-// STATIC/DYNAMIC READING
-
-void        useStaticStrings();
-void        useDynamicStrings();
-char        pgm_read_byte(const char* a);
-const int   pgm_read_word_near(const int* a);
-char        pgm_read_byte_near(const unsigned char* a);
-const char* PSTR(const char* a);
 
 // FINISHING
 

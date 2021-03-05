@@ -408,10 +408,6 @@ void goToScreen(screen screen, int mode) {
     setMargins(margin, margin);
     toolbarCommit();
     _goToScreenLock = 0;
-    unsecureAddButton(18, 286, 10, 10, boardDigitalPortClicked, 0, 6, 9, 40, 10, 0);
-    unsecureAddButton(18, 512, 10, 10, boardAnalogPortClicked, 0, 6, 3, 40, 30, 0);
-    unsecureAddButton(10, 660, 300, 20, boardAnalogValueClicked, 0, 1, 1, 40, 30, 0);
-    unsecureAddButton(10, 690, 110, 20, dc, 0, 1, 1, 0, 0, 0);
 
     for (int i = 0; i < buttonCounter + debugButtonCounter; i++)
         drawDebugButtonRect(buttons[i]);

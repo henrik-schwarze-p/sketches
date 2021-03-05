@@ -81,6 +81,7 @@ uint16_t    getDescriptorForInstance(uint8_t instance);
 unsigned char getForegroundInstance();
 void          setForegroundInstance(unsigned char newInstance);
 
+
 extern uint16_t lastState[];
 #define STATE_CHANGED 65534
 #define STATE_NOT_CONFIGURED 65533

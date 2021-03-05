@@ -346,7 +346,7 @@ const char* nameForInstance(int instance) {
     return callGeneratedName(instance);
 }
 
-//int typeForInstance(int instance) {
+// int typeForInstance(int instance) {
 //    return callGeneratedId(instance);
 //}
 
