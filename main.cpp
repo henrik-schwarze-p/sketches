@@ -5,49 +5,66 @@
 // g++  -std=c++11  -DmacOS=1 -I/Library/Frameworks/SDL2.framework/Headers -F/Library/Frameworks -framework SDL2  -o Aq
 // *.cpp *.o
 
-#include <SDL2/SDL.h>
-
+#include <SDL/SDL.h>
 #include "AquaOS.h"
+#include <emscripten.h>
 
-SDL_Surface*  surface;
-SDL_Renderer* renderer = NULL;
-SDL_Window*   window = NULL;
+SDL_Surface* surface;
 
-int main(int argc, char** argv) {
+void one();
+
+void main_2(void* arg);
+
+int down = 0;
+
+extern "C" int main(int argc, char** argv) {
+    down = 0;
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("AquaOS", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 320 * 3, 240 * 3,
-                              SDL_WINDOW_ALLOW_HIGHDPI);
-    surface = SDL_GetWindowSurface(window);
-    int       down = 0;
-    SDL_Event windowEvent;
+
+    surface = SDL_SetVideoMode(320 * 3, 240 * 3, 32, SDL_SWSURFACE);
+    if (SDL_MUSTLOCK(surface))
+        SDL_LockSurface(surface);
     setup();
-    SDL_UpdateWindowSurface(window);
-    int running = 1;
-    while (running) {
-        SDL_Delay(20);
-        loop();
-        SDL_UpdateWindowSurface(window);
-        while (SDL_PollEvent(&windowEvent)) {
-            switch (windowEvent.type) {
-                case SDL_QUIT:
-                    running = 0;
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    down = 1;
-                    setTouchX(windowEvent.motion.x);
-                    setTouchY(windowEvent.motion.y);
-                    setMouseUp(1);
-                    loop();
-                    SDL_UpdateWindowSurface(window);
-                    break;
+    if (SDL_MUSTLOCK(surface))
+        SDL_UnlockSurface(surface);
+    emscripten_async_call(main_2, NULL, 200);
+    return 0;
+}
+
+#define abs(x) ((x) < 0 ? -(x) : (x))
+void one() {
+    if (SDL_MUSTLOCK(surface))
+        SDL_LockSurface(surface);
+    loop();
+    if (SDL_MUSTLOCK(surface))
+        SDL_UnlockSurface(surface);
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        SDL_MouseButtonEvent* m = (SDL_MouseButtonEvent*)&event;
+        switch (event.type) {
+            case SDL_MOUSEBUTTONDOWN: {
+                down = 1;
+                setTouchX(m->x);
+                setTouchY(m->y);
+                setMouseUp(1);
+                if (SDL_MUSTLOCK(surface))
+                    SDL_LockSurface(surface);
+                loop();
+                if (SDL_MUSTLOCK(surface))
+                    SDL_UnlockSurface(surface);
+                break;
                 case SDL_MOUSEMOTION:
                     // This is a piece of garbage
-                    if (down && windowEvent.motion.y > 650) {
-                        setTouchX(windowEvent.motion.x);
-                        setTouchY(windowEvent.motion.y);
+                    if (down && m->y > 650) {
+                        setTouchX(m->x);
+                        setTouchY(m->y);
                         setMouseUp(1);
+                        if (SDL_MUSTLOCK(surface))
+                            SDL_LockSurface(surface);
                         loop();
-                        SDL_UpdateWindowSurface(window);
+
+                        if (SDL_MUSTLOCK(surface))
+                            SDL_UnlockSurface(surface);
                     }
                     break;
                 case SDL_MOUSEBUTTONUP:
@@ -56,7 +73,8 @@ int main(int argc, char** argv) {
             }
         }
     }
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return EXIT_SUCCESS;
+}
+
+void main_2(void* arg) {
+    emscripten_set_main_loop(one, 10, 0);
 }

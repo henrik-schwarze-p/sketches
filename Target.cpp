@@ -6,8 +6,7 @@
 //  Copyright © 2019 Kurt Schwarze. All rights reserved.
 //
 #include "Target.h"
-
-#include <SDL2/SDL.h>
+#include <SDL/SDL.h>
 #include <stdio.h>
 
 #include "AquaOS.h"
@@ -16,42 +15,32 @@ extern SDL_Surface* surface;
 
 // TFT SCREEN
 
+
+long random(int c) {
+    return rand()%c;
+}
+
 void tftReset() {
 }
 
+void _setPixel(int x, int y, int color);
 void tftRect(int x, int y, int w, int h, int c) {
     int rh = w;
     int rw = h;
     int rx = HR - y - h;
     int ry = x;
-    int r = (c >> 11) * 255 / 31;
-    int g = ((c >> 5) % 64) * 255 / 63;
-    int b = (c % 32) * 255 / 31;
-    SDL_LockSurface(surface);
-    SDL_Rect rect;
-    rect.x = rx;
-    rect.y = ry;
-    rect.w = rw;
-    rect.h = rh;
-    SDL_FillRect(surface, &rect, SDL_MapRGBA(surface->format, r, g, b, 255));
-    SDL_UnlockSurface(surface);
+    // extremely inefficient
+    for (int i = rx; i < rx + rw; i++)
+        for (int j = ry; j < ry + rh; j++)
+            _setPixel(i, j, c);
 }
 
 void _setPixel(int x, int y, int color) {
-    if (x < 0)
-        x = 0;
-    if (y < 0)
-        y = 0;
-    if (x > 959)
-        x = 959;
-    if (y > 240 * 3 - 1)
-        y = 240 * 3 - 1;
     int r = (color >> 11) * 255 / 31;
     int g = ((color >> 5) % 64) * 255 / 63;
     int b = (color % 32) * 255 / 31;
-    SDL_LockSurface(surface);
+
     *((Uint32*)surface->pixels + y * 320 * 3 + x) = SDL_MapRGBA(surface->format, r, g, b, 255);
-    SDL_UnlockSurface(surface);
 }
 
 void tftPixel(int x, int y, int c) {
@@ -151,22 +140,6 @@ void useStaticStrings() {
 void useDynamicStrings() {
 }
 
-char pgm_read_byte(const char* a) {
-    return *a;
-}
-
-const int pgm_read_word_near(const int* a) {
-    return *a;
-}
-
-char pgm_read_byte_near(const unsigned char* a) {
-    return *a;
-}
-
-const char* PSTR(const char* a) {
-    return a;
-}
-
 // FINISHING
 
 void terminate() {
@@ -184,20 +157,22 @@ void writeToHeap(int a, unsigned char c) {
 
 // EPROM
 
-void www(int a, unsigned char c) {
-}
+FILE* outfile = NULL;
 
-unsigned char rrr(int address) {
-    return (unsigned char)_eprom[address];
-}
-
-void writeByteToEEPROM(int address, unsigned char value) {
-    if (readByteFromEEPROM(address) == value) {
-        return;
+void writeByteToEEPROM(int a, unsigned char c) {
+    if (a < 0 || a >= EPROM_SIZE)
+        fatalError(8, a);
+    if (outfile == NULL) {
+        unsigned char c[4096];
+        for (int i = 0; i < 4096; i++)
+            c[i] = 0;
+        outfile = fopen("/file.txt", "wb");
+        fwrite(&c, 1, 4096, outfile);
     }
-    if (address < 0 || address >= EPROM_SIZE)
-        fatalError(17, address);
-    _eprom[address] = value;
+    fseek(outfile, a, SEEK_SET);
+    fwrite(&c, 1, 1, outfile);
+    fflush(outfile);
+    _eprom[a] = c;
 }
 
 void writeIntToEEPROM(int address, unsigned int value) {
@@ -215,6 +190,18 @@ unsigned int readIntFromEEPROM(int address) {
     return readByteFromEEPROM(address) * 256 + readByteFromEEPROM(address + 1);
 }
 
-int random(int r) {
-    return rand() % r;
+char pgm_read_byte(const char* a) {
+    return *a;
+}
+
+const int pgm_read_word_near(const int* a) {
+    return *a;
+}
+
+char pgm_read_byte_near(const unsigned char* a) {
+    return *a;
+}
+
+const char* PSTR(const char* a) {
+    return a;
 }

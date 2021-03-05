@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "BoardLib.h"
 
-#include <SDL2/SDL.h>
+#include <SDL/SDL.h>
 
 #define VELOCITY 1
 

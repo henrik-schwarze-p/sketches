@@ -16,6 +16,9 @@ unsigned int millis();
 
 #define EPROM_SIZE 4096
 
+long random(int c);
+
+
 // TFT SCREEN
 
 void tftReset();
@@ -79,5 +82,9 @@ unsigned char readByteFromEEPROM(int address);
 
 unsigned int readIntFromEEPROM(int address);
 
-int random(int r);
+char pgm_read_byte(const char* a);
+const int pgm_read_word_near(const int* a);
+char pgm_read_byte_near(const unsigned char* a);
+const char* PSTR(const char* a);
+
 #endif /* Target_h */
